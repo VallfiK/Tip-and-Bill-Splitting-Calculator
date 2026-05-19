@@ -115,6 +115,100 @@
     .hidden {
       display: none;
     }
+
+    .tip-mode-toggle {
+      display: flex;
+      background: var(--divider);
+      border-radius: var(--radius-input);
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      height: 48px;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .tip-content {
+      margin-bottom: 24px;
+    }
+
+    .slider-wrapper {
+      position: relative;
+      padding: 16px 0;
+    }
+
+    #tip-slider {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--divider);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    #tip-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    #tip-slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .slider-value {
+      display: block;
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 16px;
+    }
+
+    .tip-calculated {
+      text-align: center;
+      font-size: 18px;
+      color: var(--secondary);
+      margin-bottom: 24px;
+    }
+
+    .tip-calculated span {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-secondary {
+      background: var(--divider);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -137,6 +231,52 @@
       </div>
 
       <button class="btn btn-primary" id="btn-to-tip" disabled>Далее</button>
+    </section>
+
+    <section class="step hidden" id="step-tip" data-step="2">
+      <p class="step-label">Шаг 2 из 4</p>
+      <h1 class="step-title">Чаевые</h1>
+      <p class="step-hint">Сколько оставить?</p>
+
+      <div class="tip-mode-toggle">
+        <button class="mode-btn active" data-mode="percent">%</button>
+        <button class="mode-btn" data-mode="fixed">Сумма</button>
+      </div>
+
+      <div class="tip-content" id="tip-percent-content">
+        <div class="slider-wrapper">
+          <input
+            type="range"
+            id="tip-slider"
+            min="5"
+            max="30"
+            step="1"
+            value="15"
+            aria-label="Процент чаевых"
+          >
+          <span class="slider-value" id="tip-percent-value">15%</span>
+        </div>
+      </div>
+
+      <div class="tip-content hidden" id="tip-fixed-content">
+        <div class="input-wrapper">
+          <input
+            type="number"
+            id="tip-fixed-input"
+            class="bill-input"
+            placeholder="0"
+            inputmode="decimal"
+          >
+          <span class="currency">₽</span>
+        </div>
+      </div>
+
+      <p class="tip-calculated">Чаевые: <span id="tip-amount-display">0 ₽</span></p>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" id="btn-back-amount">Назад</button>
+        <button class="btn btn-primary" id="btn-to-people">Далее</button>
+      </div>
     </section>
   </main>
   <script>
@@ -171,6 +311,108 @@ billInput.addEventListener('input', () => {
 });
 
 billInput.focus();
+
+// Step 2 - Tip Selection
+const tipSection = document.getElementById('step-tip');
+const modeBtns = document.querySelectorAll('.mode-btn');
+const percentContent = document.getElementById('tip-percent-content');
+const fixedContent = document.getElementById('tip-fixed-content');
+const tipSlider = document.getElementById('tip-slider');
+const tipPercentValue = document.getElementById('tip-percent-value');
+const tipFixedInput = document.getElementById('tip-fixed-input');
+const tipAmountDisplay = document.getElementById('tip-amount-display');
+const btnToPeople = document.getElementById('btn-to-people');
+
+let currentTipMode = 'percent';
+
+function updateTipDisplay() {
+  const bill = parseFloat(billInput.value) || 0;
+  let tipAmount = 0;
+
+  if (currentTipMode === 'percent') {
+    const percent = parseInt(tipSlider.value);
+    tipAmount = bill * (percent / 100);
+  } else {
+    tipAmount = parseFloat(tipFixedInput.value) || 0;
+  }
+
+  tipAmountDisplay.textContent = Math.round(tipAmount).toLocaleString('ru-RU') + ' ₽';
+}
+
+modeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTipMode = btn.dataset.mode;
+
+    if (currentTipMode === 'percent') {
+      percentContent.classList.remove('hidden');
+      fixedContent.classList.add('hidden');
+    } else {
+      percentContent.classList.add('hidden');
+      fixedContent.classList.remove('hidden');
+      tipFixedInput.focus();
+    }
+    updateTipDisplay();
+  });
+});
+
+tipSlider.addEventListener('input', () => {
+  tipPercentValue.textContent = tipSlider.value + '%';
+  updateTipDisplay();
+});
+
+tipFixedInput.addEventListener('input', updateTipDisplay);
+
+btnToPeople.addEventListener('click', () => {
+  const settings = loadSettings();
+  settings.tipMode = currentTipMode;
+  settings.tipPercent = parseInt(tipSlider.value);
+  settings.tipFixed = parseFloat(tipFixedInput.value) || 0;
+  saveSettings(settings);
+  showStep3();
+});
+
+document.getElementById('btn-back-amount').addEventListener('click', showStep1);
+
+function showStep1() {
+  billInput.value = loadSettings().lastBill || '';
+  billInput.focus();
+  billInput.dispatchEvent(new Event('input'));
+}
+
+function showStep2() {
+  document.getElementById('step-amount').classList.add('hidden');
+  tipSection.classList.remove('hidden');
+
+  const settings = loadSettings();
+  currentTipMode = settings.tipMode;
+  tipSlider.value = settings.tipPercent;
+  tipPercentValue.textContent = settings.tipPercent + '%';
+  tipFixedInput.value = settings.tipFixed || '';
+
+  modeBtns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === currentTipMode);
+  });
+  percentContent.classList.toggle('hidden', currentTipMode !== 'percent');
+  fixedContent.classList.toggle('hidden', currentTipMode === 'percent');
+
+  updateTipDisplay();
+}
+
+function showStep3() {
+  tipSection.classList.add('hidden');
+  document.getElementById('step-people').classList.remove('hidden');
+}
+
+// Wire up btn-to-tip to call showStep2
+const btnToTipEl = document.getElementById('btn-to-tip');
+btnToTipEl.addEventListener('click', () => {
+  const settings = loadSettings();
+  settings.lastBill = parseFloat(billInput.value) || 0;
+  saveSettings(settings);
+  showStep2();
+});
 </script>
 </body>
 </html>
