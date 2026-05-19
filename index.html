@@ -480,6 +480,7 @@ function saveSettings(settings) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 }
 
+// Step 2 - Tip Selection
 const billInput = document.getElementById('bill-input');
 const btnToTip = document.getElementById('btn-to-tip');
 
@@ -489,7 +490,6 @@ billInput.addEventListener('input', () => {
 
 billInput.focus();
 
-// Step 2 - Tip Selection
 const tipSection = document.getElementById('step-tip');
 const modeBtns = document.querySelectorAll('.mode-btn');
 const percentContent = document.getElementById('tip-percent-content');
@@ -583,8 +583,7 @@ function showStep3() {
 }
 
 // Wire up btn-to-tip to call showStep2
-const btnToTipEl = document.getElementById('btn-to-tip');
-btnToTipEl.addEventListener('click', () => {
+btnToTip.addEventListener('click', () => {
   const settings = loadSettings();
   settings.lastBill = parseFloat(billInput.value) || 0;
   saveSettings(settings);
