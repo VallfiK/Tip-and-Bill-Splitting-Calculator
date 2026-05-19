@@ -31,21 +31,146 @@
       max-width: 400px;
     }
 
-    .step { }
-    .hidden { display: none; }
-    .btn { }
-    .btn-primary { }
-    .btn-secondary { }
-    .nav-buttons { }
-    .input-wrapper { }
-    .currency { }
-    .bill-input { }
-    .step-label { }
-    .step-title { }
-    .step-hint { }
+    .step {
+      background: var(--input-bg);
+      border-radius: var(--radius-card);
+      padding: 32px 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .step-label {
+      font-size: 14px;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    .step-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step-hint {
+      font-size: 14px;
+      color: var(--secondary);
+      margin-bottom: 32px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .bill-input {
+      width: 100%;
+      font-size: 48px;
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid var(--divider);
+      border-radius: var(--radius-input);
+      padding: 16px 48px 16px 24px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+
+    .bill-input:focus {
+      border-color: var(--accent);
+    }
+
+    .currency {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 32px;
+      color: var(--secondary);
+    }
+
+    .btn {
+      width: 100%;
+      height: 56px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-input);
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <main class="calculator" id="app"></main>
+  <main class="calculator" id="app">
+    <section class="step" id="step-amount" data-step="1">
+      <p class="step-label">Шаг 1 из 4</p>
+      <h1 class="step-title">Сумма счёта</h1>
+      <p class="step-hint">Введите сумму со счёта</p>
+
+      <div class="input-wrapper">
+        <input
+          type="number"
+          id="bill-input"
+          class="bill-input"
+          placeholder="0"
+          inputmode="decimal"
+          autocomplete="off"
+        >
+        <span class="currency">₽</span>
+      </div>
+
+      <button class="btn btn-primary" id="btn-to-tip" disabled>Далее</button>
+    </section>
+  </main>
+  <script>
+const STORAGE_KEY = 'tipCalculatorSettings';
+
+const defaultSettings = {
+  lastBill: 0,
+  tipMode: 'percent',
+  tipPercent: 15,
+  tipFixed: 0,
+  personCount: 2
+};
+
+function loadSettings() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? { ...defaultSettings, ...JSON.parse(stored) } : defaultSettings;
+  } catch {
+    return defaultSettings;
+  }
+}
+
+function saveSettings(settings) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+const billInput = document.getElementById('bill-input');
+const btnToTip = document.getElementById('btn-to-tip');
+
+billInput.addEventListener('input', () => {
+  btnToTip.disabled = !billInput.value || parseFloat(billInput.value) <= 0;
+});
+
+billInput.focus();
+</script>
 </body>
 </html>
