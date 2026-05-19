@@ -679,6 +679,12 @@ function calculateResult() {
     perPerson
   };
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const settings = loadSettings();
+  billInput.value = settings.lastBill || '';
+  billInput.dispatchEvent(new Event('input'));
+});
 </script>
 </body>
 </html>
