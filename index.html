@@ -550,7 +550,13 @@ btnToPeople.addEventListener('click', () => {
   showStep3();
 });
 
-document.getElementById('btn-back-amount').addEventListener('click', showStep1);
+document.getElementById('btn-back-amount').addEventListener('click', () => {
+  tipSection.classList.add('hidden');
+  document.getElementById('step-amount').classList.remove('hidden');
+  billInput.value = loadSettings().lastBill || '';
+  billInput.focus();
+  billInput.dispatchEvent(new Event('input'));
+});
 
 function showStep1() {
   billInput.value = loadSettings().lastBill || '';
