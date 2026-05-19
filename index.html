@@ -552,6 +552,8 @@ btnToPeople.addEventListener('click', () => {
 
 document.getElementById('btn-back-amount').addEventListener('click', () => {
   tipSection.classList.add('hidden');
+  peopleSection.classList.add('hidden');
+  resultSection.classList.add('hidden');
   document.getElementById('step-amount').classList.remove('hidden');
   billInput.value = loadSettings().lastBill || '';
   billInput.focus();
@@ -562,10 +564,18 @@ function showStep1() {
   billInput.value = loadSettings().lastBill || '';
   billInput.focus();
   billInput.dispatchEvent(new Event('input'));
+
+  // Hide all other steps
+  tipSection.classList.add('hidden');
+  peopleSection.classList.add('hidden');
+  resultSection.classList.add('hidden');
+  document.getElementById('step-amount').classList.remove('hidden');
 }
 
 function showStep2() {
   document.getElementById('step-amount').classList.add('hidden');
+  peopleSection.classList.add('hidden');
+  resultSection.classList.add('hidden');
   tipSection.classList.remove('hidden');
 
   const settings = loadSettings();
@@ -585,6 +595,7 @@ function showStep2() {
 
 function showStep3() {
   tipSection.classList.add('hidden');
+  resultSection.classList.add('hidden');
   document.getElementById('step-people').classList.remove('hidden');
 }
 
@@ -632,12 +643,6 @@ document.getElementById('btn-to-result').addEventListener('click', () => {
 });
 
 document.getElementById('btn-back-tip').addEventListener('click', showStep2);
-
-function showStep3() {
-  const settings = loadSettings();
-  personCount = settings.personCount || 2;
-  updatePeopleDisplay();
-}
 
 function showStep4() {
   peopleSection.classList.add('hidden');
