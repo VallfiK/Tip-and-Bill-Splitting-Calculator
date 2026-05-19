@@ -209,6 +209,43 @@
       background: var(--divider);
       color: var(--text);
     }
+
+    .counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .counter-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--divider);
+      background: var(--input-bg);
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.2s;
+    }
+
+    .counter-btn:active {
+      transform: scale(0.95);
+    }
+
+    .counter-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .counter-value {
+      font-size: 48px;
+      font-weight: 700;
+      min-width: 60px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -276,6 +313,23 @@
       <div class="nav-buttons">
         <button class="btn btn-secondary" id="btn-back-amount">Назад</button>
         <button class="btn btn-primary" id="btn-to-people">Далее</button>
+      </div>
+    </section>
+
+    <section class="step hidden" id="step-people" data-step="3">
+      <p class="step-label">Шаг 3 из 4</p>
+      <h1 class="step-title">Количество человек</h1>
+      <p class="step-hint">На сколько разделить?</p>
+
+      <div class="counter">
+        <button class="counter-btn" id="btn-dec">−</button>
+        <span class="counter-value" id="people-count">2</span>
+        <button class="counter-btn" id="btn-inc">+</button>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" id="btn-back-tip">Назад</button>
+        <button class="btn btn-primary" id="btn-to-result">Далее</button>
       </div>
     </section>
   </main>
@@ -413,6 +467,54 @@ btnToTipEl.addEventListener('click', () => {
   saveSettings(settings);
   showStep2();
 });
+
+// Step 3 - Person Count
+const peopleSection = document.getElementById('step-people');
+const peopleCount = document.getElementById('people-count');
+const btnDec = document.getElementById('btn-dec');
+const btnInc = document.getElementById('btn-inc');
+
+let personCount = 2;
+
+function updatePeopleDisplay() {
+  peopleCount.textContent = personCount;
+  btnDec.disabled = personCount <= 1;
+  btnInc.disabled = personCount >= 20;
+}
+
+btnDec.addEventListener('click', () => {
+  if (personCount > 1) {
+    personCount--;
+    updatePeopleDisplay();
+  }
+});
+
+btnInc.addEventListener('click', () => {
+  if (personCount < 20) {
+    personCount++;
+    updatePeopleDisplay();
+  }
+});
+
+document.getElementById('btn-to-result').addEventListener('click', () => {
+  const settings = loadSettings();
+  settings.personCount = personCount;
+  saveSettings(settings);
+  showStep4();
+});
+
+document.getElementById('btn-back-tip').addEventListener('click', showStep2);
+
+function showStep3() {
+  const settings = loadSettings();
+  personCount = settings.personCount || 2;
+  updatePeopleDisplay();
+}
+
+function showStep4() {
+  peopleSection.classList.add('hidden');
+  document.getElementById('step-result').classList.remove('hidden');
+}
 </script>
 </body>
 </html>
