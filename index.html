@@ -246,6 +246,60 @@
       min-width: 60px;
       text-align: center;
     }
+
+    .result-card {
+      background: var(--bg);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--secondary);
+    }
+
+    .result-row span:last-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .result-divider {
+      height: 1px;
+      background: var(--divider);
+      margin: 16px 0;
+    }
+
+    .result-total {
+      font-size: 18px;
+    }
+
+    .result-total span:last-child {
+      font-size: 20px;
+    }
+
+    .result-final {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 16px;
+      border-top: 2px solid var(--accent);
+    }
+
+    .result-final span:first-child {
+      font-size: 16px;
+      color: var(--secondary);
+    }
+
+    .result-final span:last-child {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -330,6 +384,41 @@
       <div class="nav-buttons">
         <button class="btn btn-secondary" id="btn-back-tip">Назад</button>
         <button class="btn btn-primary" id="btn-to-result">Далее</button>
+      </div>
+    </section>
+
+    <section class="step hidden" id="step-result" data-step="4">
+      <p class="step-label">Итог</p>
+      <h1 class="step-title">Результат</h1>
+
+      <div class="result-card">
+        <div class="result-row">
+          <span>Сумма счёта</span>
+          <span id="result-bill">0 ₽</span>
+        </div>
+        <div class="result-row">
+          <span>Чаевые</span>
+          <span id="result-tip">0 ₽</span>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-row result-total">
+          <span>Итого</span>
+          <span id="result-total">0 ₽</span>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-row">
+          <span>Разделить на</span>
+          <span id="result-people">2 чел.</span>
+        </div>
+        <div class="result-final">
+          <span>Каждый платит</span>
+          <span id="result-per-person">0 ₽</span>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" id="btn-back-people">Назад</button>
+        <button class="btn btn-primary" id="btn-reset">Новый расчёт</button>
       </div>
     </section>
   </main>
@@ -513,7 +602,48 @@ function showStep3() {
 
 function showStep4() {
   peopleSection.classList.add('hidden');
-  document.getElementById('step-result').classList.remove('hidden');
+  resultSection.classList.remove('hidden');
+
+  const result = calculateResult();
+
+  document.getElementById('result-bill').textContent = Math.round(result.bill).toLocaleString('ru-RU') + ' ₽';
+  document.getElementById('result-tip').textContent = Math.round(result.tip).toLocaleString('ru-RU') + ' ₽';
+  document.getElementById('result-total').textContent = Math.round(result.total).toLocaleString('ru-RU') + ' ₽';
+  document.getElementById('result-people').textContent = result.people + ' чел.';
+  document.getElementById('result-per-person').textContent = Math.round(result.perPerson).toLocaleString('ru-RU') + ' ₽';
+}
+
+document.getElementById('btn-back-people').addEventListener('click', showStep3);
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  billInput.value = '';
+  personCount = 2;
+  showStep1();
+});
+
+const resultSection = document.getElementById('step-result');
+
+function calculateResult() {
+  const bill = parseFloat(billInput.value) || 0;
+  const settings = loadSettings();
+
+  let tipAmount = 0;
+  if (settings.tipMode === 'percent') {
+    tipAmount = bill * (settings.tipPercent / 100);
+  } else {
+    tipAmount = settings.tipFixed || 0;
+  }
+
+  const total = bill + tipAmount;
+  const perPerson = total / settings.personCount;
+
+  return {
+    bill,
+    tip: tipAmount,
+    total,
+    people: settings.personCount,
+    perPerson
+  };
 }
 </script>
 </body>
